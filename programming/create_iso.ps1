@@ -4,7 +4,7 @@
 # Break this into functions and or classes
 
 
-$rebuildorig = $false # Should it mount the ISO and bring over a fresh copy of the ISO files.
+$rebuildorig = $true # Should it mount the ISO and bring over a fresh copy of the ISO files.
 $cleanpriorfiles = $true # Should it get rid of the custom files and wims
 $refreshcustom = $true #Should it refresh the custom files from the original
 $buildboot = $true # Should it build the boot wim.
@@ -59,7 +59,8 @@ $oscdimg  = "$tools\oscdimg.exe"
 $etfsboot = "$tools\etfsboot.com"
 $efisys   = "$tools\efisys_noprompt.bin"
 $oscddata = '2#p0,e,b"{0}"#pef,e,b"{1}"' -f $etfsboot, $efisys
-$customiso = "$winfiles\home-win$($isover)_$(get-date -f yyyyMMdd-HHMMss).iso"
+#$customiso = "$winfiles\home-win$($isover)_$(get-date -f yyyyMMdd-HHMMss).iso"
+$customiso = "$winfiles\home-win$($isover).iso"
 
 $fantasy = "useagle\wininstall"
 $winstallpath =  "$basedir\scripts\wininstall"
