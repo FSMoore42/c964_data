@@ -11,28 +11,10 @@ $buildboot = $true # Should it build the boot wim.
 $buildinstall = $true # Should it build the install wim
 $installdrivers = $true # Should it install drivers
 $buildiso = $true # Should it create the ISO
-$transferiso = $true # Should it transfer the ISO to vCenter
 $deloldiso = $true # Should it delete old ISOs from local and remote repository?
-$buildtestvm = $true # create new vm, mount and open console window
 $isover = "10" #windows version
 $istest = $true # if testing, only modify dc-g image and remove the rest
 $cleanupimage = $false # determines whether or not to run cleanup-image the image
-
-$vertodir = @{
-	## Correlates the Windows image with the proper folders.
-	"2016" = "\Server\2016"
-	"2019" = "\Server\2019"
-	"2022" = "\server\2022"
-	"11" = "\windows11"
-	"10" = "\windows10"
-}
-<# $vertobase = @{
-	## Correlates the Windows image with the proper folders.
-	"2016" = "windows"
-	"2019" = "windows"
-	"2022" = "windows"
-	"11" = "windows"
-} #>
 
 
 $remoteisopath = "\\deneir\public\programs\os\windows\$isover"
@@ -54,7 +36,6 @@ $bootwim = $(join-path -path $wimpath -childpath "boot.wim")
 $installwim = $(join-path -path $wimpath -childpath "install.wim")
 $f6drivers = $(join-path -path $drvpath -childpath "f6")
 $tools    = 'D:\Windows Kits\11\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg'
-#$oscdimg  = "$tools\oscdimg.exe"
 $oscdimg  = "$tools\oscdimg.exe"
 $etfsboot = "$tools\etfsboot.com"
 $efisys   = "$tools\efisys_noprompt.bin"
@@ -64,7 +45,6 @@ $customiso = "$winfiles\home-win$($isover).iso"
 
 $fantasy = "useagle\wininstall"
 $winstallpath =  "$basedir\scripts\wininstall"
-#$r7install = "\\fs01\eagle\it\infrastructure\programs\software\rapid7\wininstall"
 
 $wimtofolder = @{
 	## Correlates the Windows image with the proper folders.
