@@ -16,14 +16,14 @@ class IsoManager {
 
     IsoManager([string]$baseDir) {
         $this._FileSystem = [FileSystem]::new()
-        $this.BaseDir = $baseDir
+        $this._BaseDir = $baseDir
         $this.UpdatePaths()
         $this.UpdateOscdimgPaths()
     }
 
     [string] get_BaseDir() { return $this._BaseDir }
     [void] set_BaseDir([string]$value) { 
-        $this._BaseDir = $value
+        $this.BaseDir = $value
         $this.UpdatePaths() 
     }
     [string] get_OrigIsoFiles() { return $this._OrigIsoFiles }
@@ -82,10 +82,10 @@ class IsoManager {
         Write-Host "Begin: ExtractIso"
 
         # Extract ISO content to OrigIsoFiles
-        $this._FileSystem.GetChildItems("$($(Mount-DiskImage -ImagePath $localIso -PassThru | Get-Volume).DriveLetter):\") | 
-            $this._FileSystem.CopyItem($_, $this.OrigIsoFiles, $true)
-        Dismount-DiskImage -ImagePath $localIso
+        $this._FileSystem.GetChildItems("$($(Mount-DiskImage -ImagePath $localIso -PassThru | Get-Volume).DriveLetter):\") |
+            ForEach-Object { $this._FileSystem.CopyItem($_, $this.OrigIsoFiles, $true) }
 
+        Dismount-DiskImage -ImagePath $localIso
         Write-Host "End: ExtractIso"
     }
 

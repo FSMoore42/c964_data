@@ -6,7 +6,7 @@ class FileSystem {
     [System.IO.FileInfo[]] GetChildItems([string]$path) {
         return Get-ChildItem $path
     }
-    
+                           
     [void] RemoveItem([string]$path) {
         Remove-Item $path
     }
