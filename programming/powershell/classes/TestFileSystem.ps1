@@ -1,10 +1,10 @@
 # Import the module containing the FileSystem class
-Import-Module ./FileSystem.ps1
+. .E:\users\fmoore\documents\GitHub\repos\home\programming\powershell\classes\FileSystem.ps1
 
 Describe "FileSystem" {
     BeforeAll {
         $fileSystem = [FileSystem]::new()
-        $testPath = "testPath"
+        $testPath = "e:\users\fmoore\documents\GitHub\testing"
         $testDestination = "testDestination"
         $testChildPath = "testChildPath"
         $testItemType = "testItemType"
@@ -36,4 +36,29 @@ Describe "FileSystem" {
     }
 
     # Continue with similar blocks for RemoveItem, JoinPath, TestPath, NewItem, MoveItem, RenameItem, and GetContent
+
+    It "Sets content" {
+        # Setup
+        New-Item $testPath -ItemType File
+        $content = "testContent"
+        # Test
+        $fileSystem.SetContent($testPath, $content)
+        # Assert
+        $fileSystem.GetContent($testPath) | Should -Be $content
+        # Cleanup
+        Remove-Item $testPath
+    }
+
+    # Continue with similar blocks for SetContent
+
+    It "Throws an exception when the path does not exist" {
+        # Setup
+        $testPath = "testPath"
+        # Test
+        $exception = { $fileSystem.CopyItem($testPath, $testDestination) } | Should -Throw
+        # Assert
+        $exception.Exception.Message | Should -Be "The path 'testPath' does not exist."
+    }
+
+    # Continue with similar blocks for GetChildItems, RemoveItem, JoinPath, TestPath, NewItem, MoveItem, RenameItem, GetContent, and SetContent
 }
