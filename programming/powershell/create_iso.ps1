@@ -12,25 +12,25 @@ $buildinstall = $true # Should it build the install wim
 $installdrivers = $true # Should it install drivers
 $buildiso = $true # Should it create the ISO
 $deloldiso = $true # Should it delete old ISOs from local and remote repository?
-$isover = "10" #windows version
+$osver = "10" #windows version
 $istest = $true # if testing, only modify dc-g image and remove the rest
 $cleanupimage = $false # determines whether or not to run cleanup-image the image
 
 
-$remoteisopath = "\\deneir\public\programs\os\windows\$isover"
+$remoteisopath = "\\deneir\public\programs\os\windows\$osver"
 $basedir = "e:\winiso"
 $scriptdir = $(join-path -path $basedir -childpath "scripts")
 $offlinedir = $(join-path -path $basedir -childpath "offline")
 $drvpath = $(join-path -path $basedir -childpath "drivers")
 $winfiles = $(join-path -path $basedir -childpath "winfiles")
-$localisopath = $(join-path -path $(join-path -path $winfiles -childpath "isos") -ChildPath $isover)
+$localisopath = $(join-path -path $(join-path -path $winfiles -childpath "isos") -ChildPath $osver)
 $wimpath = $(join-path -path $winfiles -childpath "wimfiles")
 $customfiles = $(join-path -path $winfiles -childpath "customfiles")
 $customsources = $(join-path -path $customfiles -childpath "sources")
 $customboot = $(join-path -path $customsources -childpath "boot.wim")
 $custominstall = $(join-path -path $customsources -childpath "install.wim")
 $origisofiles = $(join-path -path $winfiles -childpath "origisofiles")
-$patchpath = $(join-path -path $basedir -childpath "patches\$($isover)")
+$patchpath = $(join-path -path $basedir -childpath "patches\$($osver)")
 
 $bootwim = $(join-path -path $wimpath -childpath "boot.wim")
 $installwim = $(join-path -path $wimpath -childpath "install.wim")
@@ -40,8 +40,8 @@ $oscdimg  = "$tools\oscdimg.exe"
 $etfsboot = "$tools\etfsboot.com"
 $efisys   = "$tools\efisys_noprompt.bin"
 $oscddata = '2#p0,e,b"{0}"#pef,e,b"{1}"' -f $etfsboot, $efisys
-#$customiso = "$winfiles\home-win$($isover)_$(get-date -f yyyyMMdd-HHMMss).iso"
-$customiso = "$winfiles\home-win$($isover).iso"
+#$customiso = "$winfiles\home-win$($osver)_$(get-date -f yyyyMMdd-HHMMss).iso"
+$customiso = "$winfiles\home-win$($osver).iso"
 
 $fantasy = "useagle\wininstall"
 $winstallpath =  "$basedir\scripts\wininstall"
@@ -85,7 +85,7 @@ if ($rebuildorig) {
 	$localiso = $(join-path -path $localisopath -childpath $remoteiso.name)
 
 	#check if any ISO files exist in the $localisopath that have a different name and delete them
-	$localisofiles = $(Get-ChildItem $localisopath | Where-Object{$_.name -like "*$isover*.iso" -and $_.name -ne $remoteiso.name})
+	$localisofiles = $(Get-ChildItem $localisopath | Where-Object{$_.name -like "*$osver*.iso" -and $_.name -ne $remoteiso.name})
 
 	if ($localisofiles) {
 		foreach ($localisofile in $localisofiles) {
@@ -155,7 +155,7 @@ if ($buildinstall) {
 	if ($istest) {		
 		
 		foreach ($img in $(get-windowsimage -imagepath $installwim)) {
-			if ($img.ImageName -ne $imgtokeep[$isover]) {
+			if ($img.ImageName -ne $imgtokeep[$osver]) {
 				remove-windowsimage -imagepath $installwim -name $($img.imagename)
 			}
 		}
@@ -182,7 +182,7 @@ if ($buildinstall) {
 				write-host "End: Drivers"
 				<#
 				#get-windowscapability -path $locwimpath | Select-Object{$_.name -like "*expl*" -and $_.state -ne "NotPresent"} | Remove-WindowsCapability
-				if ($isover -ne "2016") {
+				if ($osver -ne "2016") {
 					get-windowscapability -path $locwimpath | Select-Object{$_.name -like "*expl*" -and $_.state -ne "NotPresent"} | Remove-WindowsCapability -Path $locwimpath				
 				} else{
 					Disable-WindowsOptionalFeature -path $locwimpath -featurename "Internet-Explorer-Optional-amd64" #2016?
@@ -229,7 +229,7 @@ if ($buildinstall) {
 
 if ($buildiso) {
 	if ($deloldiso) {
-		Get-ChildItem "$winfiles\*$isover*.iso" | remove-item
+		Get-ChildItem "$winfiles\*$osver*.iso" | remove-item
 	}
 	if ((test-path $bootwim) -and -not (test-path $customboot)) {
 		move-item $bootwim $customsources -force -passthru | set-itemproperty -name isreadonly -value $true

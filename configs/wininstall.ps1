@@ -75,6 +75,37 @@ $path = [System.Environment]::GetEnvironmentVariable("Path",[System.EnvironmentV
 [System.Environment]::GetEnvironmentVariable("chocolateyinstall",[System.EnvironmentVariableTarget]::Machine)
 
 
+<# This is they below section in Powershell 5
+
+# Creating directory
+New-Item -Path "d:\programs" -ItemType Directory
+
+# Upgrading Chocolatey
+choco upgrade chocolatey
+import-module c:\programdata\chocolatey\helpers\chocolateyprofile.psm1
+refreshenv
+
+# Removing a directory
+Remove-Item "c:\programdata\chocolatey" -Recurse -Force
+
+# Enabling Chocolatey feature
+choco feature enable -n useRememberedArgumentsForUpgrades
+
+# Adding a registry entry
+New-ItemProperty -Path "HKLM:\SOFTWARE\VideoLAN\VLC" -Name "InstallDir" -Value "d:\programs\vlc" -PropertyType "String" -Force
+
+# Creating more directories
+New-Item -Path "d:\programs\google", "d:\programs(x86)\google", "d:\programs(x86)\correto", "d:\programs\powershell" -ItemType Directory
+
+# Creating junctions
+New-Item -Path "C:\Program Files\Google" -ItemType Junction -Value "d:\programs\google"
+New-Item -Path "C:\Program Files (x86)\Google" -ItemType Junction -Value "d:\programs(x86)\google"
+New-Item -Path "C:\Program Files\Amazon Corretto" -ItemType Junction -Value "d:\programs(x86)\correto"
+New-Item -Path "C:\Program Files\PowerShell" -ItemType Junction -Value "d:\programs\powershell"
+New-Item -Path "C:\Program Files (x86)\WinSCP" -ItemType Junction -Value "d:\programs(x86)\winscp"
+
+#>
+
 
 #cmd
 mkdir d:\programs
@@ -94,6 +125,8 @@ mklink /d /j "C:\Program Files\Google" "d:\programs\google"
 mklink /d /j "C:\Program Files (x86)\Google" "d:\programs(x86)\google"
 mklink /d /j "C:\Program Files\Amazon Corretto" "d:\programs(x86)\correto"
 mklink /d /j "C:\Program Files\PowerShell" "d:\programs\powershell"
+mklink /d /j "C:\Program Files (x86)\WinSCP" "d:\programs(x86)\winscp"
+
 
 choco install dotnetfx powershell microsoft-edge corretto17jdk googlechrome -y
 choco install powershell-core -y --install-arguments='"ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=1 ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 REGISTER_MANIFEST=1 ENABLE_PSREMOTING=1 USE_MU=1 ENABLE_MU=1"'
