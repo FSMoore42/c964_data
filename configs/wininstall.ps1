@@ -120,13 +120,15 @@ mkdir "d:\programs\google"
 mkdir "d:\programs(x86)\google"
 mkdir "d:\programs(x86)\correto"
 mkdir "d:\programs\powershell"
+mkdir "d:\programs(x86)\winscp"
+mkdir "d:\programs(x86)\jetbrains"
 
 mklink /d /j "C:\Program Files\Google" "d:\programs\google"
 mklink /d /j "C:\Program Files (x86)\Google" "d:\programs(x86)\google"
 mklink /d /j "C:\Program Files\Amazon Corretto" "d:\programs(x86)\correto"
 mklink /d /j "C:\Program Files\PowerShell" "d:\programs\powershell"
 mklink /d /j "C:\Program Files (x86)\WinSCP" "d:\programs(x86)\winscp"
-
+mklink /d /j "C:\Program Files (x86)\JetBrains" "d:\programs(x86)\jetbrains"
 
 choco install dotnetfx powershell microsoft-edge corretto17jdk googlechrome -y
 choco install powershell-core -y --install-arguments='"ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=1 ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 REGISTER_MANIFEST=1 ENABLE_PSREMOTING=1 USE_MU=1 ENABLE_MU=1"'
@@ -139,7 +141,10 @@ choco install sumatrapdf.install -y --params "'/NoDesktop /WithFilter /WithPrevi
 choco install 7zip.install -y --install-arguments '/D="d:\programs\7zip"'
 choco install teamviewer  -y --install-arguments '/D="d:\programs\teamviewer"'
 choco install vlc.install -y --install-arguments '/D="d:\programs\vlc"'
-choco install (choco find python3 | ?{$_ -match "python3\d+? "} | sort -Descending @{e={[int]($_.split(".")[1])}} | select -first 1).split(' ')[0] -y --params "/InstallDir:d:\python312 /nolockdown"
+$pyver = (choco find python3 | ?{$_ -match "python3\d+? "} | sort -Descending @{e={[int]($_.split(".")[1])}} | select -first 1).split(' ')[0]
+choco install $pyver -y --params "/InstallDir:d:\python\$($pyver) /nolockdown"
+$pycharmver = (choco find pycharm-community | ?{$_ -match "PyCharm-community \d+?"} | sort -Descending @{e={[int]($_.split(".")[1])}} | select -first 1).split(" ")[1]
+
 choco install firefox -y --params "'/InstallDir:"d:\programs\firefox" /nodesktopshortcut /removedistributiondir'"
 
 
