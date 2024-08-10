@@ -1,4 +1,4 @@
-. "$PSScriptRoot\FileSystem.ps1"
+import-module $PSScriptRoot\FileSystem.ps1
 
 class IsoManager {
 

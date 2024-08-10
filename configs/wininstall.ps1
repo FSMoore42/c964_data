@@ -5,7 +5,6 @@ import-module .\KnownFolderPath.ps1
 $oldprof = "c:\users\fmoore"
 $newprof = "e:\home\fmoore"
 $dirs = @("desktop","downloads" ,"favorites" ,"music" ,"pictures","videos","documents"  ,"roamingappdata")
-#$dirs = @("documents")
 
 foreach ($d in $dirs) {
     $path=""
@@ -13,8 +12,6 @@ foreach ($d in $dirs) {
     $newpath = $path.tolower().replace($oldprof,$newprof).tolower()
     if (-not(test-path $newpath)) {new-item -path $newpath -itemtype directory | out-null}
     robocopy /zb /mir $path $newpath /xj /xf "Desktop.ini" | out-null
-    
-    
     
     # Handle junctions
     $dirOutput = cmd /c dir "$path" /a
@@ -53,11 +50,6 @@ foreach ($d in $dirs) {
         }
     }
 
-
-    
-    
-    
-    
     Set-KnownFolderPath $d $newpath
     Get-KnownFolderPath $d ([ref]$path)
 
@@ -74,66 +66,36 @@ $path = [System.Environment]::GetEnvironmentVariable("Path",[System.EnvironmentV
 [System.Environment]::GetEnvironmentVariable("PATH",[System.EnvironmentVariableTarget]::Machine)
 [System.Environment]::GetEnvironmentVariable("chocolateyinstall",[System.EnvironmentVariableTarget]::Machine)
 
-
-<# This is they below section in Powershell 5
-
-# Creating directory
-New-Item -Path "d:\programs" -ItemType Directory
-
-# Upgrading Chocolatey
-choco upgrade chocolatey
-import-module c:\programdata\chocolatey\helpers\chocolateyprofile.psm1
-refreshenv
-
-# Removing a directory
-Remove-Item "c:\programdata\chocolatey" -Recurse -Force
-
-# Enabling Chocolatey feature
-choco feature enable -n useRememberedArgumentsForUpgrades
-
-# Adding a registry entry
-New-ItemProperty -Path "HKLM:\SOFTWARE\VideoLAN\VLC" -Name "InstallDir" -Value "d:\programs\vlc" -PropertyType "String" -Force
-
-# Creating more directories
-New-Item -Path "d:\programs\google", "d:\programs(x86)\google", "d:\programs(x86)\correto", "d:\programs\powershell" -ItemType Directory
-
-# Creating junctions
-New-Item -Path "C:\Program Files\Google" -ItemType Junction -Value "d:\programs\google"
-New-Item -Path "C:\Program Files (x86)\Google" -ItemType Junction -Value "d:\programs(x86)\google"
-New-Item -Path "C:\Program Files\Amazon Corretto" -ItemType Junction -Value "d:\programs(x86)\correto"
-New-Item -Path "C:\Program Files\PowerShell" -ItemType Junction -Value "d:\programs\powershell"
-New-Item -Path "C:\Program Files (x86)\WinSCP" -ItemType Junction -Value "d:\programs(x86)\winscp"
-
-#>
-
-
 #cmd
 mkdir d:\programs
-choco upgrade chocolatey
+choco upgrade chocolatey -y
 refreshenv
 rmdir /s /q c:\programdata\chocolatey
 choco feature enable -n=useRememberedArgumentsForUpgrades
 reg add HKLM\SOFTWARE\VideoLAN\VLC /v "InstallDir" /t REG_SZ /d "d:\programs\vlc"
 
-
 mkdir "d:\programs\google"
-mkdir "d:\programs(x86)\google"
-mkdir "d:\programs(x86)\correto"
 mkdir "d:\programs\powershell"
+mkdir "d:\programs\correto"
+mkdir "d:\programs\vlc"
+mkdir "d:\programs\git"
+
+mkdir "d:\programs(x86)\google"
 mkdir "d:\programs(x86)\winscp"
-mkdir "d:\programs(x86)\jetbrains"
 
+mklink /d /j "D:\Program Files" "d:\programs"
 mklink /d /j "C:\Program Files\Google" "d:\programs\google"
-mklink /d /j "C:\Program Files (x86)\Google" "d:\programs(x86)\google"
-mklink /d /j "C:\Program Files\Amazon Corretto" "d:\programs(x86)\correto"
+mklink /d /j "C:\Program Files\Amazon Corretto" "d:\programs\correto"
 mklink /d /j "C:\Program Files\PowerShell" "d:\programs\powershell"
+mklink /d /j "C:\Program Files\git" "d:\programs\git"
+
+mklink /d /j "D:\Program Files" "d:\programs(x86)"
+mklink /d /j "C:\Program Files (x86)\Google" "d:\programs(x86)\google"
 mklink /d /j "C:\Program Files (x86)\WinSCP" "d:\programs(x86)\winscp"
-mklink /d /j "C:\Program Files (x86)\JetBrains" "d:\programs(x86)\jetbrains"
 
-choco install dotnetfx powershell microsoft-edge corretto17jdk googlechrome -y
+choco install dotnetfx powershell microsoft-edge corretto17jdk googlechrome winscp -y
 choco install powershell-core -y --install-arguments='"ADD_FILE_CONTEXT_MENU_RUNPOWERSHELL=1 ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=1 REGISTER_MANIFEST=1 ENABLE_PSREMOTING=1 USE_MU=1 ENABLE_MU=1"'
-
-pwsh
+choco install firefox -y --params "'/InstallDir:"d:\programs\firefox" /nodesktopshortcut /removedistributiondir'"
 choco install notepadplusplus.install -y --install-arguments '"/D=d:\programs\notepad++"'
 choco install git.install -y --params="'/GitAndUnixToolsOnPath'"
 choco install vscode.install -y --params "/NoDesktopIcon /NoQuickLaunchIcon" --install-arguments '/dir="d:\programs\vscode"'
@@ -141,14 +103,24 @@ choco install sumatrapdf.install -y --params "'/NoDesktop /WithFilter /WithPrevi
 choco install 7zip.install -y --install-arguments '/D="d:\programs\7zip"'
 choco install teamviewer  -y --install-arguments '/D="d:\programs\teamviewer"'
 choco install vlc.install -y --install-arguments '/D="d:\programs\vlc"'
-$pyver = (choco find python3 | ?{$_ -match "python3\d+? "} | sort -Descending @{e={[int]($_.split(".")[1])}} | select -first 1).split(' ')[0]
-choco install $pyver -y --params "/InstallDir:d:\python\$($pyver) /nolockdown"
-$pycharmver = (choco find pycharm-community | ?{$_ -match "PyCharm-community \d+?"} | sort -Descending @{e={[int]($_.split(".")[1])}} | select -first 1).split(" ")[1]
-
-choco install firefox -y --params "'/InstallDir:"d:\programs\firefox" /nodesktopshortcut /removedistributiondir'"
+choco install "pycharm-community" -y  --params "/NoDesktopIcon /NoQuickLaunchIcon" --install-arguments '/dir="d:\programs\jetbrains\pycharm"'
+choco install "intellijidea-community" -y  --params "/NoDesktopIcon /NoQuickLaunchIcon" --install-arguments '/dir="d:\programs\jetbrains\idea"'
 
 
-cmd
 git config --global user.name = "Forrest Moore"
 git config --global user.email = "vaulden@gmail.com"
 
+#pwsh
+$pyver = (choco find python3 | Where-Object{$_ -match "python3\d+? "} | Sort-Object -Descending @{e={[int]($_.split(".")[1])}} | Select-Object -first 1).split(' ')[0]
+choco install $pyver -y --params "/InstallDir:d:\python\$($pyver) /nolockdown"
+
+# Set explorer settings for hidden, extensions, etc.
+$key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+
+Set-ItemProperty $key Hidden 1
+Set-ItemProperty $key HideFileExt 0
+Set-ItemProperty $key ShowSuperHidden 1
+Set-ItemProperty $key hidedriveswithnomedia 0
+Set-ItemProperty $key hidemergeconflicts 0
+
+Stop-Process -processname explorer

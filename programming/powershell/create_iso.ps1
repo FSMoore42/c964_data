@@ -4,12 +4,13 @@
 # Break this into functions and or classes
 
 
-$rebuildorig = $true # Should it mount the ISO and bring over a fresh copy of the ISO files.
+$rebuildorig = $false # Should it mount the ISO and bring over a fresh copy of the ISO files.
 $cleanpriorfiles = $true # Should it get rid of the custom files and wims
 $refreshcustom = $true #Should it refresh the custom files from the original
 $buildboot = $true # Should it build the boot wim.
 $buildinstall = $true # Should it build the install wim
 $installdrivers = $true # Should it install drivers
+$installpatches = $true # Should it install drivers
 $buildiso = $true # Should it create the ISO
 $deloldiso = $true # Should it delete old ISOs from local and remote repository?
 $osver = "10" #windows version
@@ -19,7 +20,7 @@ $cleanupimage = $false # determines whether or not to run cleanup-image the imag
 
 $remoteisopath = "\\deneir\public\programs\os\windows\$osver"
 $basedir = "e:\winiso"
-$scriptdir = $(join-path -path $basedir -childpath "scripts")
+$scriptpath= $(join-path -path $basedir -childpath "scripts")
 $offlinedir = $(join-path -path $basedir -childpath "offline")
 $drvpath = $(join-path -path $basedir -childpath "drivers")
 $winfiles = $(join-path -path $basedir -childpath "winfiles")
@@ -43,8 +44,9 @@ $oscddata = '2#p0,e,b"{0}"#pef,e,b"{1}"' -f $etfsboot, $efisys
 #$customiso = "$winfiles\home-win$($osver)_$(get-date -f yyyyMMdd-HHMMss).iso"
 $customiso = "$winfiles\home-win$($osver).iso"
 
-$fantasy = "useagle\wininstall"
-$winstallpath =  "$basedir\scripts\wininstall"
+$customwimfilespath = $(join-path -path $scriptpath -childpath "wininstall")
+# $customisofilespathsrc = $(join-path -path $wininstallpath -childpath "isofiles")
+# $customwimfilespathsrc = $(join-path -path $wininstallpath -childpath "wimfiles")
 
 $wimtofolder = @{
 	## Correlates the Windows image with the proper folders.
@@ -150,8 +152,7 @@ if ($buildboot) {
 }
 
 if ($buildinstall) {
-	move-item $custominstall $wimpath -force -passthru | set-itemproperty -name isreadonly -value $false
-	#$imglen = $(get-windowsimage -imagepath $installwim).length
+	move-item $custominstall $wimpath -force -passthru | set-itemproperty -name isreadonly -value $false	
 	if ($istest) {		
 		
 		foreach ($img in $(get-windowsimage -imagepath $installwim)) {
@@ -165,10 +166,11 @@ if ($buildinstall) {
 	$imagelist = $(get-windowsimage -imagepath $installwim)
 	write-host "Before anything: "(Get-ChildItem $installwim).length
 	$dodrivers = $installdrivers
+	$dopatches = $installpatches
 	foreach ($patchf in $(Get-ChildItem $patchpath | Where-Object{Get-ChildItem $_.fullname})) {
 		write-host "Begin: Patch Type $($patchf.name)"
 		write-host "Start "($patchf.name)": "(Get-ChildItem $installwim).length
-		$curpatchpath = "$($patchf.fullname)"		
+		$curpatchpath = "$($patchf.fullname)"
 		foreach ($winfo in $imagelist) {
 			write-host "Begin: "$winfo.imagename
 			$locwimpath = $(join-path -path $offlinedir -childpath $wimtofolder[$winfo.imagename])
@@ -179,39 +181,34 @@ if ($buildinstall) {
 			if ($dodrivers) {
 				write-host "Begin: Drivers"
 				add-windowsdriver -path $locwimpath -driver $drvpath -recurse
-				write-host "End: Drivers"
-				<#
-				#get-windowscapability -path $locwimpath | Select-Object{$_.name -like "*expl*" -and $_.state -ne "NotPresent"} | Remove-WindowsCapability
-				if ($osver -ne "2016") {
-					get-windowscapability -path $locwimpath | Select-Object{$_.name -like "*expl*" -and $_.state -ne "NotPresent"} | Remove-WindowsCapability -Path $locwimpath				
-				} else{
-					Disable-WindowsOptionalFeature -path $locwimpath -featurename "Internet-Explorer-Optional-amd64" #2016?
-				}
-				#>
+				write-host "End: Drivers"				
 				$dodrivers = $false
 			}
 
-			write-host "Begin: Patches"
-			add-windowspackage -path $locwimpath -packagepath $curpatchpath
-			write-host "End: Patches"
-			foreach ($b in @($locwimpath,$customfiles)) {
-				$useaglefolder =  "$b\$fantasy"
-				if (!(test-path $useaglefolder)) {
-					new-item $useaglefolder -itemtype directory
-				} 
-				
-				copy-item "$winstallpath\*" $useaglefolder -force
-				copy-item "$r7install\*" $useaglefolder -force
+			if ($dopatches) {
+				write-host "Begin: Patches"
+				add-windowspackage -path $locwimpath -packagepath $curpatchpath
+				write-host "End: Patches"
 			}
-			dismount-windowsimage -path $locwimpath -save
-
 			
+			foreach ($d in Get-ChildItem -Recurse -Directory $customwimfilespath) {
+				$newd = $d.fullname.tolower().replace($customwimfilespath.tolower(),$locwimpath.tolower())			
+				if (-not(test-path $newd)) {
+					New-Item -itemtype directory -path $newd
+				}
+			}
+
+			Get-ChildItem -file -Recurse $customwimfilespath -PipelineVariable f | 
+			ForEach-Object{copy-item $f.fullname $f.fullname.tolower().replace($customwimfilespath.tolower(),$locwimpath.tolower())}
+			
+			dismount-windowsimage -path $locwimpath -save
 		}
-		
+			
 		write-host "End: "$winfo.imagename
 		write-host "End "($patchf)": "(Get-ChildItem $installwim).length
 		write-host "End: Patch Type $patchf"
 	}
+
 	if ($cleanupimage) {
 		foreach ($winfo in $imagelist) {
 			write-host "Begin: Cleanup"
@@ -225,6 +222,7 @@ if ($buildinstall) {
 	}
 	move-item $installwim $customsources -force -passthru | set-itemproperty -name isreadonly -value $true
 	write-host "End: Install Image"
+
 }
 
 if ($buildiso) {
