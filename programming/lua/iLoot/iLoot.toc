@@ -1,0 +1,10 @@
+## Interface: 40400
+## Title: iLoot
+## Notes: Loot Management Addon for Innuendo-Pagel
+## Author: Kailas-Pagel
+## Version: 1.0
+
+iLootCore.lua
+iLootSK.lua
+iLootUI.lua
+locale/iLoot-enUS.lua

@@ -11,6 +11,7 @@ data_file = os.path.join(data_dir, "USA Housing Dataset.csv")
 data_file_train = os.path.join(data_dir, "data_file_train.csv")
 data_file_val = os.path.join(data_dir, "data_file_validate.csv")
 data_file_test = os.path.join(data_dir, "data_file_test.csv")
+data_file_out = os.path.join(data_dir, "data_file.csv")
 columns_to_drop = ["sqft_lot","sqft_above","sqft_basement","view","yr_renovated"]
 
 # Load the dataset
