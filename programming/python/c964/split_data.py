@@ -26,7 +26,7 @@ train_data, val_data = train_test_split(data, test_size=0.2, random_state=42)
 train_data.to_csv(data_file_train, index=False)
 val_data.to_csv(data_file_val, index=False)
 # test_data.to_csv(data_file_test, index=False)
-# data.to_csv(data_file_train, index=False)
+data.to_csv(data_file_out, index=False)
 
 print("Data successfully split and saved.")
 subprocess.Popen(f'explorer {os.path.realpath(data_dir)}')
